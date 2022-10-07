@@ -1,0 +1,29 @@
+// PictureCopy.idl : PictureCopy.exe 的类型库源
+
+// 此文件将由 MIDL 编译器处理以产生
+// 类型库(PictureCopy.tlb)。
+
+[ uuid(B2A9DB1A-5271-4983-BE12-6C120E10E47F), version(1.0) ]
+library PictureCopy
+{
+	importlib("stdole32.tlb");
+	importlib("stdole2.tlb");
+
+	//  CPictureCopyDoc 的主调度接口
+	
+	[ uuid(64E78357-8EBA-434B-9679-A23060651AEA) ]
+	dispinterface IPictureCopy
+	{
+		properties:
+			
+		methods:
+	};
+
+	//  CPictureCopyDoc 的类信息
+	
+	[ uuid(1728C39B-124F-4426-9257-F47BB6DA5EC8) ]
+	coclass PictureCopy
+	{
+		[default] dispinterface IPictureCopy;
+	};
+};

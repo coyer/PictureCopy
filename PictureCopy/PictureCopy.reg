@@ -1,0 +1,17 @@
+REGEDIT
+; 此 .REG 文件可能由 SETUP 程序使用。
+;   如果 SETUP 程序不可用，则以下条目将
+;   CWinApp::RegisterShellFileTypes 和 COleObjectFactory::UpdateRegistryAll
+;   在 InitInstance 中对下列项自动进行注册。
+
+
+HKEY_CLASSES_ROOT\PictureCopy.Application = PictureCopy Application
+
+
+HKEY_CLASSES_ROOT\PictureCopy.Application\CLSID = {1728C39B-124F-4426-9257-F47BB6DA5EC8}
+
+HKEY_CLASSES_ROOT\CLSID\{1728C39B-124F-4426-9257-F47BB6DA5EC8} = PictureCopy Application
+HKEY_CLASSES_ROOT\CLSID\{1728C39B-124F-4426-9257-F47BB6DA5EC8}\ProgId = PictureCopy.Application
+
+
+HKEY_CLASSES_ROOT\CLSID\{1728C39B-124F-4426-9257-F47BB6DA5EC8}\LocalServer32 = PictureCopy.EXE
