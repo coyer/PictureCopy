@@ -37,4 +37,5 @@ public:
 //	afx_msg void OnBnClickedButtonUpdate();
 	afx_msg void OnKillfocusEditExtendDesc();
 	afx_msg void OnBnClickedOk();
+	afx_msg void OnDblclkListStylename();
 };

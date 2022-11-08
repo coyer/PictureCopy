@@ -13,6 +13,7 @@ public:
 	CString styleName;
 	CStringArray extNames;
 
+	void  SetName(CString& name);
 	int   AddExt(CString& ext);
 	BOOL  DeleteExt(CString& ext);
 	int	  FindExt(CString& ext);
@@ -35,17 +36,20 @@ public:
 	BOOL		AddStyleAndExts(CString& styleName, CString& extsarr);
 	BOOL		AddStyleAndExts(LPCTSTR styleName, LPCTSTR extsarr);
 
-	void	Clear();
+	void		Clear();
 	CSingleType*	AddStyle(CString& styleName);
 	CSingleType*	GetStyle(CString& styleName);
-	CStringArray* GetAllExt(CString& styleName);
+	
+	CStringArray*	GetAllExt(CString& styleName);
 
-	CSingleType* GetAt(int index);
+	CSingleType*		GetAt(int index);
 	int					GetCount();
 	void				DeleteStyle(CString& styleName);
 	void				DeleteStyle(int index);
 	void				DeleteExt(CString& styleName, CString& extName);
 	int					GetIndex(CString& styleName);
+	BOOL				UpdateStyleName(int index, CString& newName);
+	BOOL				UpdateStyleName(CString& oldName, CString& newName);
 private:
 	CPtrArray		m_typeData;
 };

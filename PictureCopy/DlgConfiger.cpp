@@ -54,7 +54,7 @@ void CDlgConfiger::DoDataExchange(CDataExchange* pDX)
 BEGIN_MESSAGE_MAP(CDlgConfiger, CDialogEx)
 	ON_BN_CLICKED(IDOK, &CDlgConfiger::OnBnClickedOk)
 	ON_BN_CLICKED(IDC_BUTTON_DSTROOT_SELECT, &CDlgConfiger::OnBnClickedButtonDstrootSelect)
-	ON_BN_CLICKED(IDC_BUTTON_SRC_ALL, &CDlgConfiger::OnBnClickedButtonSrcAll)
+	ON_BN_CLICKED(IDC_BUTTON_SRC_ADD, &CDlgConfiger::OnBnClickedButtonSrcAll)
 	ON_LBN_SELCHANGE(IDC_LIST_SOURCES, &CDlgConfiger::OnSelchangeListSources)
 	ON_BN_CLICKED(IDC_BUTTON_SRC_DEL, &CDlgConfiger::OnBnClickedButtonSrcDel)
 	ON_BN_CLICKED(IDC_BUTTON_CLEAR, &CDlgConfiger::OnBnClickedButtonClear)
@@ -120,6 +120,47 @@ void CDlgConfiger::OnBnClickedOk()
 BOOL CDlgConfiger::OnInitDialog()
 {
 	CDialogEx::OnInitDialog();
+	EnableToolTips(TRUE);
+
+	m_tooltip.Create(this);
+	m_tooltip.SetMaxTipWidth(200);
+	//设定文字的颜色
+	m_tooltip.SetTipTextColor(RGB(0, 0, 255));
+
+	//设定提示文字在控件上停留的时间
+	m_tooltip.SetDelayTime(150);
+	m_tooltip.Activate(TRUE);
+
+	m_tooltip.AddTool(GetDlgItem(IDC_EDIT_DEST), _T("您选择的目标文件目录"));
+	m_tooltip.AddTool(GetDlgItem(IDC_BUTTON_DSTROOT_SELECT), _T("点击后，弹出文件夹选择框作为目标目录"));
+	m_tooltip.AddTool(GetDlgItem(IDC_LIST_SOURCES), _T("您选择的源文件目录"));
+	
+	m_tooltip.AddTool(GetDlgItem(IDC_BUTTON_SRC_ADD), _T("增加一个源文件目录"));
+	m_tooltip.AddTool(GetDlgItem(IDC_BUTTON_SRC_DEL), _T("删除选择的源文件目录"));
+	m_tooltip.AddTool(GetDlgItem(IDC_BUTTON_CLEAR), _T("清除所有的源文件目录"));
+	m_tooltip.AddTool(GetDlgItem(IDC_RADIO_SRC_MODE), _T("使用移动模式，拷贝完成后源文件不存在"));
+	m_tooltip.AddTool(GetDlgItem(IDC_RADIO_SRC_MODE_REMAIN), _T("使用复制模式，源文件不被删除"));
+	m_tooltip.AddTool(GetDlgItem(IDC_CHECK_TIME_FROM_EXIF), _T("JPG文件头中一般含有EXIF信息，从EXIF中读取日期和作者等信息"));
+	m_tooltip.AddTool(GetDlgItem(IDC_CHECK_TIME_FROM_FILENAME), _T("尝试读取文件名称中的日期信息来作为文件日期，有可能把普通数字解析成日期"));
+	m_tooltip.AddTool(GetDlgItem(IDC_CHECK_TIME_FROM_FOLDER), _T("尝试读取文件夹称中的日期信息来作为文件日期，有可能把普通数字解析成日期"));
+	m_tooltip.AddTool(GetDlgItem(IDC_BUTTON_DATE_RANGE), _T("限制文件的日期范围，有助于防止普通数字字符串被当成日期"));
+	m_tooltip.AddTool(GetDlgItem(IDC_RADIO_FOLDER_RULE), _T("按照原来的子目录层级，在新文件夹中保持相同的目录"));
+	m_tooltip.AddTool(GetDlgItem(IDC_RADIO_FOLDER_CUSTOM), _T("按照自定义规则来进行子文件夹的设置"));
+	m_tooltip.AddTool(GetDlgItem(IDC_EDIT_DEST_FOLDER), _T("可用的定义有：<TYPE>，<EXT>，<DEV>，<AUTHOR>，<YYYY>，<YY>，<MM>，<DD>，<WEEKDAY>，<~>"));
+	m_tooltip.AddTool(GetDlgItem(IDC_RADIO_FILENAME_RULE), _T("保留原来的文件名，不变更文件名"));
+	m_tooltip.AddTool(GetDlgItem(IDC_RADIO_FILENAME_CUSTOM), _T("按照自定义规则来进行文件名称的改变，软件会自动保持后缀不变"));
+	m_tooltip.AddTool(GetDlgItem(IDC_EDIT_DEST_FILENAME), _T("可用的定义有：<TYPE>，<EXT>，<DEV>，<AUTHOR>，<YYYY>，<YY>，<MM>，<DD>，<WEEKDAY>，<~>"));
+	m_tooltip.AddTool(GetDlgItem(IDC_RADIO_EXIST_MODE), _T("如果同名文件已经存在，则跳过"));
+	m_tooltip.AddTool(GetDlgItem(IDC_RADIO_RENAME), _T("自动在同名文件名后面添加_1，以示区分"));
+	m_tooltip.AddTool(GetDlgItem(IDC_RADIO_OVERWRITE), _T("目标目录中，同名文件如果存在的话，会被覆盖，请慎重选择"));
+	m_tooltip.AddTool(GetDlgItem(IDC_RADIO_SAVE_NEWER), _T("比较同名文件的日期，源文件日期新则覆盖目标文件"));
+	m_tooltip.AddTool(GetDlgItem(IDC_RADIO_SAVE_OLDER), _T("比较同名文件的日期，源文件日期旧则覆盖目标文件"));
+	m_tooltip.AddTool(GetDlgItem(IDC_RADIO_SAVE_BIGGER), _T("比较同名文件的文件大小，源文件大则覆盖目标文件"));
+	m_tooltip.AddTool(GetDlgItem(IDC_RADIO_SAVE_SMALLER), _T("比较同名文件的文件大小，源文件小则覆盖目标文件"));
+	m_tooltip.AddTool(GetDlgItem(IDC_BUTTON_SAVEINI), _T("保存当前的配置到 config.ini 中去"));
+	m_tooltip.AddTool(GetDlgItem(IDC_BUTTON_TYPE_DEFINE), _T("进入文件类型设置"));
+	m_tooltip.AddTool(GetDlgItem(IDOK), _T("更新所有的配置信息"));
+	m_tooltip.AddTool(GetDlgItem(IDC_EDIT_FILTER), _T("默认为：*.*，表示所有的文件"));
 
 	GetDlgItem(IDOK)->EnableWindow(!m_isRunning);
 	GetDlgItem(IDC_BUTTON_OPEN)->EnableWindow(!m_isRunning);
@@ -305,4 +346,14 @@ void CDlgConfiger::OnBnClickedButtonDateRange()
 		m_pConfig->yearRangeMin = dlg.m_yearMin;
 		m_pConfig->yearRangeMax = dlg.m_yearMax;
 	}
+}
+
+
+BOOL CDlgConfiger::PreTranslateMessage(MSG* pMsg)
+{
+	// TODO: 在此添加专用代码和/或调用基类
+	if (m_tooltip.m_hWnd != NULL)
+		m_tooltip.RelayEvent(pMsg);
+
+	return CDialogEx::PreTranslateMessage(pMsg);
 }

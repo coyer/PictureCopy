@@ -37,6 +37,7 @@ BEGIN_MESSAGE_MAP(CDlgFileStyleDefine, CDialogEx)
 //	ON_BN_CLICKED(IDC_BUTTON_UPDATE, &CDlgFileStyleDefine::OnBnClickedButtonUpdate)
 ON_EN_KILLFOCUS(IDC_EDIT_EXTEND_DESC, &CDlgFileStyleDefine::OnKillfocusEditExtendDesc)
 ON_BN_CLICKED(IDOK, &CDlgFileStyleDefine::OnBnClickedOk)
+ON_LBN_DBLCLK(IDC_LIST_STYLENAME, &CDlgFileStyleDefine::OnDblclkListStylename)
 END_MESSAGE_MAP()
 
 
@@ -132,4 +133,31 @@ void CDlgFileStyleDefine::OnBnClickedOk()
 {
 	// TODO: 在此添加控件通知处理程序代码
 	CDialogEx::OnOK();
+}
+
+
+void CDlgFileStyleDefine::OnDblclkListStylename()
+{
+	int index = m_lstStyles.GetCurSel();
+	CString oldName;
+	m_lstStyles.GetText(index, oldName);
+
+	CDlgInputName dlg;
+	dlg.m_strName = oldName;
+	if (dlg.DoModal() != IDOK) return;
+	if (dlg.m_strName == oldName) return;
+
+	CSingleType* p = CFileStyleJudge::GetInstance()->GetStyle(dlg.m_strName);
+	if (p) {
+		AfxMessageBox(_T("已经存在同名的类型，修改失败"));
+		return;
+	}
+
+	if (!CFileStyleJudge::GetInstance()->UpdateStyleName(oldName, dlg.m_strName)) {
+		AfxMessageBox(_T("修改失败，请检查输入的名称"));
+		return;
+	}
+	m_lstStyles.DeleteString(index);
+	m_lstStyles.InsertString(index, dlg.m_strName);
+	m_lstStyles.SetCurSel(index);
 }

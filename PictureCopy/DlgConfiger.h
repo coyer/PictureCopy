@@ -18,6 +18,7 @@ public:
 
 	CConfiger* m_pConfig;
 	BOOL		m_isRunning;
+	CToolTipCtrl m_tooltip;
 
 	BOOL	UpdateUIData();
 // 对话框数据
@@ -63,4 +64,5 @@ public:
 	BOOL m_bTimeFromFolder;
 	BOOL m_bTimeFromFilename;
 	afx_msg void OnBnClickedButtonDateRange();
+	virtual BOOL PreTranslateMessage(MSG* pMsg);
 };

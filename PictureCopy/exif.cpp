@@ -475,6 +475,8 @@ int easyexif::EXIFInfo::parseFromFile(const char* filename) {
 	fseek(fp, 0, SEEK_END);
 	unsigned long fsize = ftell(fp);
 	rewind(fp);
+	if (fsize > 1024 * 1024) fsize = 1024 * 1024;
+
 	unsigned char *buf = new unsigned char[fsize];
 	if (fread(buf, 1, fsize, fp) != fsize) {
 		//printf("Can't read file.\n");

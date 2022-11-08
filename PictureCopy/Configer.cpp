@@ -21,8 +21,8 @@ CConfiger::CConfiger()
 	m_bNeedMoreTime = FALSE;
 	m_bNeedExtType = FALSE;
 
-	yearRangeMin = 1970;
-	yearRangeMax = 2035;
+	yearRangeMin = 2000;
+	yearRangeMax = 2022;
 }
 
 CConfiger::~CConfiger()

@@ -71,7 +71,7 @@ BOOL CCopyWorker::start() {
 		m_bRunning = FALSE;
 		return FALSE;
 	}
-	sendMsgInfo(_T("开始启动工作线程"));
+	sendMsgInfo(_T("开始启动工作线程..."));
 	m_thdHandle = ::CreateThread(NULL, NULL, gThreadFunc, this, 0, 0);
 	sendMsg(SYNCT_STARTED);
 	return TRUE;

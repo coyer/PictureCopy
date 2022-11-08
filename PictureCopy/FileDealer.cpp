@@ -326,7 +326,7 @@ BOOL CFileDealer::ReplaceStringVariant(CString& strVar, BOOL isPathMode) {
 	strYear2.Format(_T("%02d"), m_createTime.year % 100);
 	strMonth.Format(_T("%02d"), m_createTime.month);
 	strDay.Format(_T("%02d"), m_createTime.day);
-	strWeek.Format(_T("d"), m_createTime.dayOfWeek);
+	strWeek.Format(_T("%d"), m_createTime.dayOfWeek);
 
 	strVar.Replace(_T("<YYYY>"), strYear4);
 	strVar.Replace(_T("<YY>"), strYear2);

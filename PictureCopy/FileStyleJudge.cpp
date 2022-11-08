@@ -10,6 +10,11 @@ CSingleType::~CSingleType() {
 	extNames.RemoveAll();
 }
 
+void CSingleType::SetName(CString& name)
+{
+	styleName = name;
+}
+
 int CSingleType::AddExt(CString& ext)
 {
 	if (ext.GetLength() == 0) return -1;
@@ -133,6 +138,7 @@ CStringArray* CFileStyleJudge::GetAllExt(CString& styleName)
 	return &(p->extNames);
 }
 
+
 CSingleType* CFileStyleJudge::GetAt(int index)
 {
 	CSingleType* p = (CSingleType*)m_typeData.GetAt(index);
@@ -172,6 +178,26 @@ int	 CFileStyleJudge::GetIndex(CString& styleName)
 	}
 
 	return -1;
+}
+
+BOOL CFileStyleJudge::UpdateStyleName(int index, CString& newName)
+{
+	if (index < 0 || index >= m_typeData.GetCount()) {
+		return FALSE;
+	}
+
+	CSingleType* p = (CSingleType*)m_typeData.GetAt(index);
+	p->SetName(newName);
+
+	return TRUE;
+}
+
+BOOL CFileStyleJudge::UpdateStyleName(CString& oldName, CString& newName)
+{
+	if (newName.GetLength() == 0) return FALSE;
+
+	int index = GetIndex(oldName);
+	return UpdateStyleName(index, newName);
 }
 
 BOOL CFileStyleJudge::UpdateExtText(int index, CString& text)
