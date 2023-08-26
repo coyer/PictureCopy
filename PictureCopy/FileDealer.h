@@ -26,9 +26,9 @@ public:
 
 	void		SetFilesize(__int64 size);
 	void		SetCreateTime(FILETIME createTime);
-	void		SetStatusInfo(FILETIME createTime, __int64 size);
+	void		SetUpdateTime(FILETIME updateTime);
 
-	BOOL		SetMaybeTime(int year, int month, int day);
+	BOOL		SetMaybeTime(int year, int month, int day, int dayOfWeek);
 	BOOL		SetMaybeTime(FileDateInfo& dateInfo);
 
 	BOOL	ParseMoreTimeInfo(BOOL fromExif, BOOL fromFilename, BOOL fromFolder);

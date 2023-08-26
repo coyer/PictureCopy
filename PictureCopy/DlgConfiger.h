@@ -41,6 +41,11 @@ public:
 	BOOL m_dstFilenameMode;
 
 public:
+	CString m_destFolderRoot;
+	BOOL m_bTimeFromExif;
+	BOOL m_bTimeFromFolder;
+	BOOL m_bTimeFromFilename;
+
 	afx_msg void OnBnClickedOk();
 	virtual BOOL OnInitDialog();
 	afx_msg void OnBnClickedButtonDstrootSelect();
@@ -53,16 +58,13 @@ public:
 	afx_msg void OnBnClickedButtonOpen();
 	afx_msg void OnBnClickedButtonSave();
 
-	CString m_destFolderRoot;
 	afx_msg void OnClickedRadioFolderRule();
 	afx_msg void OnBnClickedRadioFolderCustom();
 	afx_msg void OnBnClickedRadioFilenameRule();
 	afx_msg void OnBnClickedRadioFilenameCustom();
 	afx_msg void OnBnClickedButtonSaveini();
 	afx_msg void OnBnClickedButtonTypeDefine();
-	BOOL m_bTimeFromExif;
-	BOOL m_bTimeFromFolder;
-	BOOL m_bTimeFromFilename;
+
 	afx_msg void OnBnClickedButtonDateRange();
 	virtual BOOL PreTranslateMessage(MSG* pMsg);
 };

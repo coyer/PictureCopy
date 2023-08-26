@@ -77,7 +77,7 @@ BOOL CDlgConfiger::UpdateUIData()
 	if (!UpdateData()) return FALSE;
 
 	m_pConfig->sourceFileNotDelete = m_sourceMode;
-	m_pConfig->overWriteMode = m_existMode;
+	m_pConfig->overWriteMode = (OVERWRITEMODE)m_existMode;
 
 	if (!m_pConfig->setDestFolderStr(m_destFolderRoot)) {
 		AfxMessageBox(_T("存储根目录不对，请重新选择"));
@@ -146,10 +146,10 @@ BOOL CDlgConfiger::OnInitDialog()
 	m_tooltip.AddTool(GetDlgItem(IDC_BUTTON_DATE_RANGE), _T("限制文件的日期范围，有助于防止普通数字字符串被当成日期"));
 	m_tooltip.AddTool(GetDlgItem(IDC_RADIO_FOLDER_RULE), _T("按照原来的子目录层级，在新文件夹中保持相同的目录"));
 	m_tooltip.AddTool(GetDlgItem(IDC_RADIO_FOLDER_CUSTOM), _T("按照自定义规则来进行子文件夹的设置"));
-	m_tooltip.AddTool(GetDlgItem(IDC_EDIT_DEST_FOLDER), _T("可用的定义有：<TYPE>，<EXT>，<DEV>，<AUTHOR>，<YYYY>，<YY>，<MM>，<DD>，<WEEKDAY>，<~>"));
+	m_tooltip.AddTool(GetDlgItem(IDC_EDIT_DEST_FOLDER), _T("可用的定义有：<TYPE>，<EXT>，<DEV>，<AUTHOR>，<YYYY>，<YY>，<MM>，<DD>，<DAY>，<~>"));
 	m_tooltip.AddTool(GetDlgItem(IDC_RADIO_FILENAME_RULE), _T("保留原来的文件名，不变更文件名"));
 	m_tooltip.AddTool(GetDlgItem(IDC_RADIO_FILENAME_CUSTOM), _T("按照自定义规则来进行文件名称的改变，软件会自动保持后缀不变"));
-	m_tooltip.AddTool(GetDlgItem(IDC_EDIT_DEST_FILENAME), _T("可用的定义有：<TYPE>，<EXT>，<DEV>，<AUTHOR>，<YYYY>，<YY>，<MM>，<DD>，<WEEKDAY>，<~>"));
+	m_tooltip.AddTool(GetDlgItem(IDC_EDIT_DEST_FILENAME), _T("可用的定义有：<TYPE>，<EXT>，<DEV>，<AUTHOR>，<YYYY>，<YY>，<MM>，<DD>，<DAY>，<~>"));
 	m_tooltip.AddTool(GetDlgItem(IDC_RADIO_EXIST_MODE), _T("如果同名文件已经存在，则跳过"));
 	m_tooltip.AddTool(GetDlgItem(IDC_RADIO_RENAME), _T("自动在同名文件名后面添加_1，以示区分"));
 	m_tooltip.AddTool(GetDlgItem(IDC_RADIO_OVERWRITE), _T("目标目录中，同名文件如果存在的话，会被覆盖，请慎重选择"));

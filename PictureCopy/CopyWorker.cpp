@@ -207,7 +207,10 @@ void CCopyWorker::listFiles(CString& baseSrc, CString folder)
 			size.HighPart = findData.nFileSizeHigh;
 
 			CFileDealer filed(baseSrc, folder, findData.cFileName);
-			filed.SetStatusInfo(findData.ftLastWriteTime, size.QuadPart);
+			
+			filed.SetFilesize(size.QuadPart);
+			filed.SetCreateTime(findData.ftCreationTime);
+			filed.SetUpdateTime(findData.ftLastWriteTime);
 			if (m_pConfig->isFileNeedExtType()) {
 				filed.ParseFileExtType();
 			}
@@ -416,7 +419,7 @@ int CCopyWorker::doCopy(CFileDealer* fd) {
 	else {
 		copystr = _T("Ê§°Ü£º");
 	}
-	if (destExist && m_pConfig->overWriteMode != 1) {
+	if (destExist && m_pConfig->overWriteMode != OVERWRITE) {
 		m_cpInfo.overCount++;
 		log = _T("¸²¸ÇÎÄ¼þ") + copystr + src + _T(" ==>> ") + dest;
 		sendMsgInfo(log);

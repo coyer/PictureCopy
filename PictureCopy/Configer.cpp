@@ -8,7 +8,7 @@ CConfiger::CConfiger()
 {
 	filter = _T("*.*");
 	sourceFileNotDelete = 0;
-	overWriteMode = 0;
+	overWriteMode = SKIP;
 	destFolderRuleMode = 0;
 	destFilenameRuleMode = 0;
 	destFolderRuleString = _T("<YYYY>-<MM>");
@@ -85,7 +85,7 @@ BOOL CConfiger::saveToFile(CString& filename)
 	content += combineKeyValue("DestPathRoot", destPathRoot);
 	content += combineKeyValue("FileFilter", filter);
 	content += combineKeyValue("SourceFileNotDelete", sourceFileNotDelete);
-	content += combineKeyValue("OverWriteMode", overWriteMode);
+	content += combineKeyValue("OverWriteMode", (int)overWriteMode);
 	content += combineKeyValue("DestFolderRuleMode", destFolderRuleMode);
 	content += combineKeyValue("DestFilenameRuleMode", destFilenameRuleMode);
 	content += combineKeyValue("DestFolderRuleStr", getDestFolderRuleString());
@@ -204,7 +204,7 @@ void CConfiger::SetConfig(CString& keyname, CString& value)
 		return;
 	}
 	if (keyname == _T("OverWriteMode")) {
-		overWriteMode = _wcstol_l(value, 0, 10, 0);
+		overWriteMode = (OVERWRITEMODE)_wcstol_l(value, 0, 10, 0);
 		return;
 	}
 	if (keyname == _T("DestFolderRuleMode")) {
@@ -356,8 +356,9 @@ BOOL CConfiger::isFileNeedExtType()
 
 BOOL CConfiger::BeforePrepareRun()
 {
+	m_bNeedExtType = FALSE;
 	m_bNeedMoreTime = FALSE;
-	if (overWriteMode == 2 || overWriteMode == 3) {
+	if (overWriteMode == SAVENEW || overWriteMode == SAVEOLD) {
 		m_bNeedMoreTime = TRUE;
 	}
 	if (destFolderRuleMode && JudgeFileHaveTime(destFolderRuleString)) {

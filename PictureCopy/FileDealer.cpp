@@ -26,6 +26,12 @@ CFileDealer::CFileDealer(CString& basePath, CString& path, CString filename) {
 	m_filename = filename;
 	m_fullPathname = basePath + path + filename;
 
+	m_fileSize = 0;
+	m_styleType = _T("others");
+	memset(&m_createTime, 0, sizeof(FileDateInfo));
+	memset(&m_dateInfo, 0, sizeof(FileDateInfo));
+	m_updatetime = 0;
+
 	int pos = m_filename.ReverseFind(_T('.'));
 	if (pos >= 0) {
 		m_extName = m_filename.Mid(pos + 1).MakeLower();
@@ -40,15 +46,18 @@ CFileDealer::CFileDealer(CString& basePath, CString& path, CString filename) {
 
 void CFileDealer::SetCreateTime(FILETIME createTime)
 {
-	m_updatetime = ((__int64)createTime.dwHighDateTime << 32) + createTime.dwLowDateTime;
-
 	SYSTEMTIME stUTC, timeLocal;
 	FileTimeToSystemTime(&createTime, &stUTC);
 	SystemTimeToTzSpecificLocalTime(NULL, &stUTC, &timeLocal);
 	m_createTime.year = timeLocal.wYear;
 	m_createTime.month = timeLocal.wMonth;
 	m_createTime.day = timeLocal.wDay;
-	m_dateInfo.dayOfWeek = timeLocal.wDayOfWeek;
+	m_createTime.dayOfWeek = timeLocal.wDayOfWeek;
+}
+
+void CFileDealer::SetUpdateTime(FILETIME updateTime)
+{
+	m_updatetime = ((__int64)updateTime.dwHighDateTime << 32) + updateTime.dwLowDateTime;
 }
 
 void CFileDealer::SetFilesize(__int64 size)
@@ -56,17 +65,12 @@ void CFileDealer::SetFilesize(__int64 size)
 	m_fileSize = size;
 }
 
-void CFileDealer::SetStatusInfo(FILETIME createTime, __int64 size)
-{
-	SetCreateTime(createTime);
-	SetFilesize(size);
-}
-
-BOOL CFileDealer::SetMaybeTime(int year, int month, int day)
+BOOL CFileDealer::SetMaybeTime(int year, int month, int day, int dayOfWeek)
 {
 	m_dateInfo.year = year;
 	m_dateInfo.month = month;
 	m_dateInfo.day = day;
+	m_dateInfo.dayOfWeek = dayOfWeek;
 	return TRUE;
 }
 
@@ -110,6 +114,8 @@ int SplitNumberFromString(const char* strval, int* arrData, int maxcount) {
 
 int SplitNumberFromStringT(const TCHAR* strval, __int64* arrData, int maxcount) {
 	if (!strval) return 0;
+	if (maxcount < 1) maxcount = 10;
+
 	int n = _tcslen(strval);
 	int i = 0;
 	const TCHAR* p = strval;
@@ -140,12 +146,14 @@ int SplitNumberFromStringT(const TCHAR* strval, __int64* arrData, int maxcount) 
 }
 
 BOOL JudgeMonthDay(int y, int m, int d) {
-	if (d < 1 || d > 31 || m > 12 || m < 1) return FALSE;
-	if (m == 2 && d > 29) return FALSE;
-	if (d == 31 && (m == 4 || m == 6 || m == 9 || m == 11)) return FALSE;
 	int yearmax = CConfiger::GetInstance()->yearRangeMax;
 	int yearmin = CConfiger::GetInstance()->yearRangeMin;
 	if (y < yearmin || y > yearmax) return FALSE;
+
+	if (d < 1 || d > 31 || m > 12 || m < 1) return FALSE;
+	if (m == 2 && d > 29) return FALSE;
+	if (d == 31 && (m == 4 || m == 6 || m == 9 || m == 11)) return FALSE;
+
 	return TRUE;
 }
 
@@ -184,7 +192,19 @@ BOOL CFileDealer::ParseExifInfo()
 
 	strA = exifinfo.DateTime.c_str();
 	CString strDateTime = CStrA2CStrT(strA);
-	return ParseTimeFromString(strDateTime, &m_dateInfo);
+	if (!ParseTimeFromString(strDateTime, &m_dateInfo)) return false;
+	
+	SYSTEMTIME stUTC, timeLocal;
+	memset(&timeLocal, 0, sizeof(SYSTEMTIME));
+	memset(&timeLocal, 0, sizeof(stUTC));
+	timeLocal.wYear = m_dateInfo.year;
+	timeLocal.wMonth = m_dateInfo.month;
+	timeLocal.wDay = m_dateInfo.day;
+	FILETIME ft = { 0 };
+	SystemTimeToFileTime(&timeLocal, &ft);
+	FileTimeToSystemTime(&ft, &stUTC);
+	m_dateInfo.dayOfWeek = stUTC.wDayOfWeek;
+	return TRUE;
 }
 
 BOOL CFileDealer::ParseTimeFromString(CString& pureName, FileDateInfo* pDateInfo)
@@ -220,6 +240,10 @@ BOOL CFileDealer::ParseTimeFromString(CString& pureName, FileDateInfo* pDateInfo
 				pDateInfo->year = (int)(t / 10000);
 				pDateInfo->month = m;
 				pDateInfo->day = d;
+				
+				CTime tm((int)(t / 10000), m, d, 0, 0, 0);
+				pDateInfo->dayOfWeek = tm.GetDayOfWeek();
+				
 				return TRUE;
 			}
 		}
@@ -231,6 +255,7 @@ BOOL CFileDealer::ParseTimeFromString(CString& pureName, FileDateInfo* pDateInfo
 				pDateInfo->year = tm.GetYear();
 				pDateInfo->month = tm.GetMonth();
 				pDateInfo->day = tm.GetDay();
+				pDateInfo->dayOfWeek = tm.GetDayOfWeek();
 				return TRUE;
 			}
 		}
@@ -321,18 +346,22 @@ BOOL CFileDealer::ReplaceStringVariant(CString& strVar, BOOL isPathMode) {
 	strVar.Replace(_T("<DEV>"), m_exifDevice);
 	strVar.Replace(_T("<AUTHOR>"), m_exifAuthor);
 	
+	FileDateInfo* pTime = &m_createTime;
+	if (m_dateInfo.year && m_dateInfo.month && m_dateInfo.day) {
+		pTime = &m_dateInfo;
+	}
 	CString strYear4, strYear2, strMonth, strDay, strWeek;
-	strYear4.Format(_T("%d"), m_createTime.year);
-	strYear2.Format(_T("%02d"), m_createTime.year % 100);
-	strMonth.Format(_T("%02d"), m_createTime.month);
-	strDay.Format(_T("%02d"), m_createTime.day);
-	strWeek.Format(_T("%d"), m_createTime.dayOfWeek);
+	strYear4.Format(_T("%d"), pTime->year);
+	strYear2.Format(_T("%02d"), pTime->year % 100);
+	strMonth.Format(_T("%02d"), pTime->month);
+	strDay.Format(_T("%02d"), pTime->day);
+	strWeek.Format(_T("%d"), pTime->dayOfWeek);
 
 	strVar.Replace(_T("<YYYY>"), strYear4);
 	strVar.Replace(_T("<YY>"), strYear2);
 	strVar.Replace(_T("<MM>"), strMonth);
 	strVar.Replace(_T("<DD>"), strDay);
-	strVar.Replace(_T("<WEEKDAY>"), strWeek);
+	strVar.Replace(_T("<DAY>"), strWeek);
 	if (isPathMode) {
 		strVar.Replace(_T("<~>"), m_path);
 	}

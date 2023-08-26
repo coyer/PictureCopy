@@ -25,6 +25,16 @@ const CString SubFolderNameMode[] = {
 	_T("<DEV>")		// exif 中的设备名，可能没有
 };
 
+typedef enum {
+	SKIP = 0,
+	RENAME,
+	OVERWRITE,
+	SAVENEW,
+	SAVEOLD,
+	SAVEBIG,
+	SAVESMALL
+}OVERWRITEMODE;
+
 class CConfiger
 {
 public:
@@ -54,7 +64,7 @@ public:
 	CString destPathRoot;
 	CStringArray sourcePaths;
 	int		sourceFileNotDelete;//源文件拷贝后是否删除
-	int		overWriteMode;		//重名覆盖策略
+	OVERWRITEMODE		overWriteMode;		//重名覆盖策略
 	int		destFolderRuleMode;		//文件夹命名规则，0表示按原来的不变。
 	int		destFilenameRuleMode;		//文件名命名规则，0表示按原来的不变。
 	CString destFolderRuleString;
