@@ -74,11 +74,7 @@ CString CSingleType::ExtsToString() {
 ///////////////////////////////////////////////////////////////////////////////////
 CFileStyleJudge::CFileStyleJudge()
 {
-	AddStyleAndExts(_T("照片"), _T("jpg,jpeg,png,heic,tiff,bmp,webp,gif,bmp,psd,raw,svg,hdr,tif,ico"));
-	AddStyleAndExts(_T("音乐"), _T("mp3,wav,ape,cda,aif,aiff,mid,midi,wma,ra,m4a,flac,aac,adt,adts"));
-	AddStyleAndExts(_T("视频"), _T("mpg,mpeg,mp4,avi,rm,rmvb,mov,wmv,asf,asx,mkv,flv,vob,3gp,navi"));
-	AddStyleAndExts(_T("文档"), _T("txt,doc,xml,ppt,pps,docs,xls,xlsx,xltx,docm,dot,potx,ppsm,pptx,rtf,vsd,vsdm,wps,"));
-	AddStyleAndExts(_T("种子"), _T("torrent,"));
+	
 }
 
 CFileStyleJudge::~CFileStyleJudge()
@@ -86,9 +82,52 @@ CFileStyleJudge::~CFileStyleJudge()
 	Clear();
 }
 
+void CFileStyleJudge::AddDefaultTypes()
+{
+	AddStyleAndExts(_T("照片"), _T("jpg,jpeg,png,heic,tiff,bmp,webp,gif,bmp,psd,raw,svg,hdr,tif,ico"));
+	AddStyleAndExts(_T("音乐"), _T("mp3,lrc,wav,ape,cda,aif,aiff,mid,midi,wma,ra,m4a,flac,aac,adt,adts"));
+	AddStyleAndExts(_T("视频"), _T("mpg,mpeg,mp4,avi,rm,rmvb,mov,wmv,asf,asx,mkv,flv,vob,3gp,navi"));
+	AddStyleAndExts(_T("文档"), _T("txt,doc,xml,ppt,pps,docs,xls,xlsx,xltx,docm,dot,potx,ppsm,pptx,rtf,vsd,vsdm,wps,"));
+	AddStyleAndExts(_T("种子"), _T("torrent,"));
+}
+
 CFileStyleJudge* CFileStyleJudge::GetInstance() {
 	static CFileStyleJudge global;
 	return &global;
+}
+
+CString	CFileStyleJudge::GetSaveString()
+{
+	CString strRet = _T("");
+	int n = m_typeData.GetCount();
+	for (int i = 0; i < n; i++) {
+		CSingleType* p = (CSingleType*)m_typeData.GetAt(i);
+		CString strOne = p->styleName + _T(":") + p->ExtsToString() + _T("|");
+		strRet += strOne;
+	}
+	return strRet;
+}
+
+BOOL CFileStyleJudge::LoadSaveString(CString& str)
+{
+	str.Trim();
+	if (str.GetLength() == 1) return FALSE;
+
+	Clear();
+	CString strValue; // an individual name, value pair
+	CString strType;
+	CString strExts;
+	int i = 0; // substring index to extract
+	while (AfxExtractSubString(strValue, str, i++, _T('|')))
+	{
+		strValue.Trim();
+		int pos = strValue.Find(_T(':'));
+		if (pos <= 0) continue;
+		strType = strValue.Left(pos);
+		strExts = strValue.Mid(pos + 1);
+		AddStyleAndExts(strType, strExts);
+	}
+	return TRUE;
 }
 
 CString	CFileStyleJudge::ParseType(CString& extName)
@@ -102,7 +141,7 @@ CString	CFileStyleJudge::ParseType(CString& extName)
 	return _T("");
 }
 
-void	CFileStyleJudge::Clear() {
+void CFileStyleJudge::Clear() {
 	int n = m_typeData.GetCount();
 	for (int i = 0; i < n; i++) {
 		CSingleType* p = (CSingleType*)m_typeData.GetAt(i);
@@ -159,7 +198,9 @@ void CFileStyleJudge::DeleteStyle(CString& styleName)
 void CFileStyleJudge::DeleteStyle(int index)
 {
 	if (index < 0 || index >= m_typeData.GetCount()) return;
+	CSingleType* p = (CSingleType*)m_typeData.GetAt(index);
 	m_typeData.RemoveAt(index);
+	delete p;
 }
 
 void CFileStyleJudge::DeleteExt(CString& styleName, CString& extName)

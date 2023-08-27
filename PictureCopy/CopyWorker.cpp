@@ -220,13 +220,14 @@ void CCopyWorker::listFiles(CString& baseSrc, CString folder)
 			size.HighPart = findData.nFileSizeHigh;
 
 			CFileDealer filed(baseSrc, folder, findData.cFileName);
+			if (!filed.ParseFileExtType()) {
+				continue;
+			}
 			
 			filed.SetFilesize(size.QuadPart);
 			filed.SetCreateTime(findData.ftCreationTime);
 			filed.SetUpdateTime(findData.ftLastWriteTime);
-			if (m_pConfig->isFileNeedExtType()) {
-				filed.ParseFileExtType();
-			}
+
 
 			if (m_pConfig->isFileNeedMoreTime()) {
 				filed.ParseMoreTimeInfo(m_pConfig->timeFromExif, m_pConfig->timeFromFilename, m_pConfig->timeFromFolder);
@@ -363,56 +364,68 @@ int CCopyWorker::doCopy(CFileDealer* fd) {
 	__int64 updateTime = 0;
 	__int64 dstFileSize = 0;
 
-	
 	destExist = checkFileExist(dest, &dstFileSize, &updateTime);
+
 	if (destExist) {
 		log = src + _T(" ==>> ") + dest;
 		m_cpInfo.existFile++;
-		switch (m_pConfig->overWriteMode)
+		
+		if (m_pConfig->checkFileContent)
 		{
-			case 0: //skip
-				log = _T("存在同名文件，跳过: ") + log;
+			BOOL isFileSame = FALSE;
+			CFileDealer::CheckFileIsSame(src, dest, &isFileSame);
+			if (isFileSame) {
+				log = _T("存在同名文件，且内容完全相同，直接跳过: ") + log;
 				sendMsgInfo(log);
 				return 0;
-			case 1: //改名
-				dest = getNewFilename(dest);
-				log = _T("改名后拷贝: ") + dest;
+			}
+		}
+
+		switch (m_pConfig->overWriteMode)
+		{
+		case 0: //skip
+			log = _T("存在同名文件，跳过: ") + log;
+			sendMsgInfo(log);
+			return 0;
+		case 1: //改名
+			dest = getNewFilename(dest);
+			log = _T("改名后拷贝: ") + dest;
+			sendMsgInfo(log);
+			destExist = FALSE;
+			break;
+		case 2: //直接覆盖
+			log = _T("直接覆盖: ") + dest;
+			sendMsgInfo(log);
+			destExist = FALSE;
+			break;
+		case 3:	//保留新的
+			if (fd->GetUpdateTime() <= updateTime) {
+				log = _T("保留最近的，跳过: ") + log;
 				sendMsgInfo(log);
-				destExist = FALSE;
-				break;
-			case 2: //直接覆盖
-				log = _T("直接覆盖: ") + dest;
+				return 0;
+			}
+			break;
+		case 4:	//保留旧的
+			if (fd->GetUpdateTime() >= updateTime) {
+				log = _T("保留旧文件，跳过: ") + log;
 				sendMsgInfo(log);
-				destExist = FALSE;
-				break;
-			case 3:	//保留新的
-				if (fd->GetUpdateTime() <= updateTime) {
-					log= _T("保留最近的，跳过: ") + log;
-					sendMsgInfo(log);
-					return 0;
-				}
-				break;
-			case 4:	//保留旧的
-				if (fd->GetUpdateTime() >= updateTime) {
-					log = _T("保留旧文件，跳过: ") + log;
-					sendMsgInfo(log);
-					return 0;
-				}
-				break;
-			case 5: //保留大的
-				if (fd->GetFilesize() <= dstFileSize) {
-					log = _T("保留大文件，跳过: ") + log;
-					sendMsgInfo(log);
-					return 0;
-				}
-				break;
-			case 6: //保留小的
-				if (fd->GetFilesize() >= dstFileSize) {
-					log= _T("保留小文件，跳过: ") + log;
-					sendMsgInfo(log);
-					return 0;
-				}
-				break;
+				return 0;
+			}
+			break;
+		case 5: //保留大的
+			if (fd->GetFilesize() <= dstFileSize) {
+				log = _T("保留大文件，跳过: ") + log;
+				sendMsgInfo(log);
+				return 0;
+			}
+			break;
+		case 6: //保留小的
+			if (fd->GetFilesize() >= dstFileSize) {
+				log = _T("保留小文件，跳过: ") + log;
+				sendMsgInfo(log);
+				return 0;
+			}
+			break;
 		default:
 			log = _T("位置模式，跳过: ") + log;
 			sendMsgInfo(log);

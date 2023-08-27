@@ -38,6 +38,8 @@ BEGIN_MESSAGE_MAP(CDlgFileStyleDefine, CDialogEx)
 ON_EN_KILLFOCUS(IDC_EDIT_EXTEND_DESC, &CDlgFileStyleDefine::OnKillfocusEditExtendDesc)
 ON_BN_CLICKED(IDOK, &CDlgFileStyleDefine::OnBnClickedOk)
 ON_LBN_DBLCLK(IDC_LIST_STYLENAME, &CDlgFileStyleDefine::OnDblclkListStylename)
+ON_BN_CLICKED(IDC_BTN_RENAME, &CDlgFileStyleDefine::OnBnClickedBtnRename)
+ON_BN_CLICKED(IDC_BTN_ADD_DEFAULT, &CDlgFileStyleDefine::OnBnClickedBtnAddDefault)
 END_MESSAGE_MAP()
 
 
@@ -61,6 +63,8 @@ void CDlgFileStyleDefine::OnBnClickedButtonDelType()
 	int index = m_lstStyles.GetCurSel();
 	m_lstStyles.DeleteString(index);
 	CFileStyleJudge::GetInstance()->DeleteStyle(index);
+	m_lastCursel = -1;
+	UpdateExtText(FALSE);
 }
 
 
@@ -68,17 +72,23 @@ BOOL CDlgFileStyleDefine::OnInitDialog()
 {
 	CDialogEx::OnInitDialog();
 
+	UpdateUI();
+	return TRUE;  // return TRUE unless you set the focus to a control
+				  // 异常: OCX 属性页应返回 FALSE
+}
+
+void CDlgFileStyleDefine::UpdateUI()
+{
+	m_lstStyles.ResetContent();
 	CFileStyleJudge* pJudge = CFileStyleJudge::GetInstance();
 	int n = pJudge->GetCount();
 	for (int i = 0; i < n; i++) {
 		m_lstStyles.AddString(pJudge->GetAt(i)->styleName);
 	}
-	
+
 	m_lstStyles.SetCurSel(0);
 	m_lastCursel = 0;
 	UpdateExtText(FALSE);
-	return TRUE;  // return TRUE unless you set the focus to a control
-				  // 异常: OCX 属性页应返回 FALSE
 }
 
 BOOL CDlgFileStyleDefine::UpdateExtText(BOOL savemode)
@@ -108,6 +118,8 @@ BOOL CDlgFileStyleDefine::UpdateExtText(BOOL savemode)
 void CDlgFileStyleDefine::OnSelchangeListStylename()
 {
 	int cursel = m_lstStyles.GetCurSel();
+	GetDlgItem(IDC_BTN_RENAME)->EnableWindow(cursel >= 0);
+
 	if (cursel == m_lastCursel) return;
 
 	UpdateExtText(TRUE);
@@ -138,7 +150,14 @@ void CDlgFileStyleDefine::OnBnClickedOk()
 
 void CDlgFileStyleDefine::OnDblclkListStylename()
 {
+	RenameCursel();
+}
+
+void CDlgFileStyleDefine::RenameCursel()
+{
 	int index = m_lstStyles.GetCurSel();
+	if (index < 0) return;
+
 	CString oldName;
 	m_lstStyles.GetText(index, oldName);
 
@@ -160,4 +179,16 @@ void CDlgFileStyleDefine::OnDblclkListStylename()
 	m_lstStyles.DeleteString(index);
 	m_lstStyles.InsertString(index, dlg.m_strName);
 	m_lstStyles.SetCurSel(index);
+}
+
+void CDlgFileStyleDefine::OnBnClickedBtnRename()
+{
+	RenameCursel();
+}
+
+
+void CDlgFileStyleDefine::OnBnClickedBtnAddDefault()
+{
+	CFileStyleJudge::GetInstance()->AddDefaultTypes();
+	UpdateUI();
 }

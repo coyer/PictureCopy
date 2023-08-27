@@ -2,7 +2,7 @@
 #include "Configer.h"
 #include "CopyWorker.h"
 #include "CJson.h"
-
+#include "FileStyleJudge.h"
 
 CConfiger::CConfiger()
 {
@@ -19,10 +19,12 @@ CConfiger::CConfiger()
 	timeFromFilename = 0;
 
 	m_bNeedMoreTime = FALSE;
-	m_bNeedExtType = FALSE;
+	//m_bNeedExtType = FALSE;
 
 	yearRangeMin = 2000;
 	yearRangeMax = 2022;
+
+	checkFileContent = TRUE;
 }
 
 CConfiger::~CConfiger()
@@ -95,6 +97,8 @@ BOOL CConfiger::saveToFile(CString& filename)
 	content += combineKeyValue("TimeFromFilename", timeFromFilename);
 	content += combineKeyValue("YearRangeMin", yearRangeMin);
 	content += combineKeyValue("YearRangeMax", yearRangeMax);
+	content += combineKeyValue("CheckFileContent", checkFileContent);
+	content += combineKeyValue("FileTypes", CFileStyleJudge::GetInstance()->GetSaveString());
 
 	file.Write(content, content.GetLength());
 	file.Close();
@@ -156,17 +160,22 @@ BOOL CConfiger::loadFromFile(CString& filename)
 		}
 		CString strName, strValue; // individual name and value elements
 
-		// Attempt to extract the name element from the pair
-		if (!AfxExtractSubString(strName, strNameValue, 0, _T('=')))
-		{
-			continue;
-		}
+		int pos = strNameValue.Find(_T('='));
+		if (pos <= 0) continue;
+		strName = strNameValue.Left(pos);
+		strValue = strNameValue.Mid(pos + 1);
 
-		// Attempt to extract the value element from the pair
-		if (!AfxExtractSubString(strValue, strNameValue, 1, _T('=')))
-		{
-			continue;
-		}
+		//// Attempt to extract the name element from the pair
+		//if (!AfxExtractSubString(strName, strNameValue, 0, _T('=')))
+		//{
+		//	continue;
+		//}
+
+		//// Attempt to extract the value element from the pair
+		//if (!AfxExtractSubString(strValue, strNameValue, 1, _T('=')))
+		//{
+		//	continue;
+		//}
 
 		// Pass the name, value pair to the debugger for display
 		SetConfig(strName, strValue);
@@ -261,6 +270,15 @@ void CConfiger::SetConfig(CString& keyname, CString& value)
 		yearRangeMax = _wcstol_l(value, 0, 10, 0);
 		return;
 	}
+
+	if (keyname == _T("CheckFileContent")) {
+		checkFileContent = _wcstol_l(value, 0, 10, 0);
+		return;
+	}
+
+	if (keyname == _T("FileTypes")) {
+		CFileStyleJudge::GetInstance()->LoadSaveString(value);
+	}
 }
 
 CString CConfiger::getDestFolderRuleString()
@@ -349,14 +367,27 @@ BOOL CConfiger::isFileNeedMoreTime()
 	return m_bNeedMoreTime;
 }
 
-BOOL CConfiger::isFileNeedExtType()
+//BOOL CConfiger::isFileNeedExtType()
+//{
+//	return m_bNeedExtType;
+//}
+
+CString CConfiger::getFileTypeString()
 {
-	return m_bNeedExtType;
+	CString strRet;
+	CFileStyleJudge* pJudge = CFileStyleJudge::GetInstance();
+	int n = pJudge->GetCount();
+	for (int i = 0; i < n; i++) {
+		if (i > 0) strRet += ", ";
+		strRet += pJudge->GetAt(i)->styleName;
+	}
+
+	return strRet;
 }
 
 BOOL CConfiger::BeforePrepareRun()
 {
-	m_bNeedExtType = FALSE;
+	//m_bNeedExtType = FALSE;
 	m_bNeedMoreTime = FALSE;
 	if (overWriteMode == SAVENEW || overWriteMode == SAVEOLD) {
 		m_bNeedMoreTime = TRUE;
@@ -368,11 +399,11 @@ BOOL CConfiger::BeforePrepareRun()
 		m_bNeedMoreTime = TRUE;
 	}
 
-	if (destFolderRuleMode && destFolderRuleString.Find(_T("<TYPE>")) >= 0) {
-		m_bNeedExtType = TRUE;
-	}
-	if (destFilenameRuleMode && destFilenameRuleString.Find(_T("<TYPE>")) >= 0) {
-		m_bNeedExtType = TRUE;
-	}
+	//if (destFolderRuleMode && destFolderRuleString.Find(_T("<TYPE>")) >= 0) {
+	//	m_bNeedExtType = TRUE;
+	//}
+	//if (destFilenameRuleMode && destFilenameRuleString.Find(_T("<TYPE>")) >= 0) {
+	//	m_bNeedExtType = TRUE;
+	//}
 	return TRUE;
 }

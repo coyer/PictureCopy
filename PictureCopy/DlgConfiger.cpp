@@ -25,6 +25,7 @@ CDlgConfiger::CDlgConfiger(CWnd* pParent /*=NULL*/)
 	, m_bTimeFromExif(FALSE)
 	, m_bTimeFromFolder(FALSE)
 	, m_bTimeFromFilename(FALSE)
+	, m_bCheckFileContent(FALSE)
 {
 
 }
@@ -48,6 +49,7 @@ void CDlgConfiger::DoDataExchange(CDataExchange* pDX)
 	DDX_Check(pDX, IDC_CHECK_TIME_FROM_EXIF, m_bTimeFromExif);
 	DDX_Check(pDX, IDC_CHECK_TIME_FROM_FOLDER, m_bTimeFromFolder);
 	DDX_Check(pDX, IDC_CHECK_TIME_FROM_FILENAME, m_bTimeFromFilename);
+	DDX_Check(pDX, IDC_CHECK_FILE_CONTENT, m_bCheckFileContent);
 }
 
 
@@ -67,6 +69,8 @@ BEGIN_MESSAGE_MAP(CDlgConfiger, CDialogEx)
 	ON_BN_CLICKED(IDC_BUTTON_SAVEINI, &CDlgConfiger::OnBnClickedButtonSaveini)
 	ON_BN_CLICKED(IDC_BUTTON_TYPE_DEFINE, &CDlgConfiger::OnBnClickedButtonTypeDefine)
 	ON_BN_CLICKED(IDC_BUTTON_DATE_RANGE, &CDlgConfiger::OnBnClickedButtonDateRange)
+	ON_BN_CLICKED(IDC_BTN_SOURCE_UP, &CDlgConfiger::OnBnClickedBtnSourceUp)
+	ON_BN_CLICKED(IDC_BTN_SOURCE_DOWN, &CDlgConfiger::OnBnClickedBtnSourceDown)
 END_MESSAGE_MAP()
 
 
@@ -89,10 +93,11 @@ BOOL CDlgConfiger::UpdateUIData()
 		m_lstSource.GetText(i, strTmp);
 		m_pConfig->addSourceFolder(strTmp);
 	}
-	m_pConfig->filter = m_strFilter;
+	//m_pConfig->filter = m_strFilter;
 	m_pConfig->timeFromExif = m_bTimeFromExif;
 	m_pConfig->timeFromFolder = m_bTimeFromFolder;
 	m_pConfig->timeFromFilename = m_bTimeFromFilename;
+	m_pConfig->checkFileContent = m_bCheckFileContent;
 
 	m_pConfig->destFolderRuleMode = m_dstFolderMode;
 	if (!m_pConfig->setDestFolderRule(m_dstFolderRule)) {
@@ -160,7 +165,8 @@ BOOL CDlgConfiger::OnInitDialog()
 	m_tooltip.AddTool(GetDlgItem(IDC_BUTTON_SAVEINI), _T("保存当前的配置到 config.ini 中去"));
 	m_tooltip.AddTool(GetDlgItem(IDC_BUTTON_TYPE_DEFINE), _T("进入文件类型设置"));
 	m_tooltip.AddTool(GetDlgItem(IDOK), _T("更新所有的配置信息"));
-	m_tooltip.AddTool(GetDlgItem(IDC_EDIT_FILTER), _T("默认为：*.*，表示所有的文件"));
+	m_tooltip.AddTool(GetDlgItem(IDC_EDIT_FILTER), _T("只有在文件类型设置中的后缀文件才会被备份，请点击按钮进行设置"));
+	m_tooltip.AddTool(GetDlgItem(IDC_CHECK_FILE_CONTENT), _T("如果要复制的文件名已经存在，对文件内容进行字节比对，确保完全相同的文件不重复备份。"));
 
 	GetDlgItem(IDOK)->EnableWindow(!m_isRunning);
 	GetDlgItem(IDC_BUTTON_OPEN)->EnableWindow(!m_isRunning);
@@ -182,10 +188,11 @@ BOOL CDlgConfiger::OnInitDialog()
 	m_dstFolderMode = m_pConfig->destFolderRuleMode;
 	m_dstFilenameMode = m_pConfig->destFilenameRuleMode;
 
-	m_strFilter = m_pConfig->filter;
+	m_strFilter = m_pConfig->getFileTypeString();
 	m_bTimeFromExif = m_pConfig->timeFromExif;
 	m_bTimeFromFolder = m_pConfig->timeFromFolder;
 	m_bTimeFromFilename = m_pConfig->timeFromFilename;
+	m_bCheckFileContent = m_pConfig->checkFileContent;
 
 	UpdateData(FALSE);
 
@@ -239,7 +246,6 @@ void CDlgConfiger::OnBnClickedButtonSrcAll()
 		}
 	}
 }
-
 
 void CDlgConfiger::OnSelchangeListSources()
 {
@@ -334,8 +340,9 @@ void CDlgConfiger::OnBnClickedButtonTypeDefine()
 {
 	CDlgFileStyleDefine dlg;
 	dlg.DoModal();
+	m_strFilter = m_pConfig->getFileTypeString();
+	UpdateData(FALSE);
 }
-
 
 void CDlgConfiger::OnBnClickedButtonDateRange()
 {
@@ -356,4 +363,28 @@ BOOL CDlgConfiger::PreTranslateMessage(MSG* pMsg)
 		m_tooltip.RelayEvent(pMsg);
 
 	return CDialogEx::PreTranslateMessage(pMsg);
+}
+
+
+void CDlgConfiger::OnBnClickedBtnSourceUp()
+{
+	int sel = m_lstSource.GetCurSel();
+	if (sel < 1) return;
+	CString strText;
+	m_lstSource.GetText(sel, strText);
+	m_lstSource.DeleteString(sel);
+	m_lstSource.InsertString(sel - 1, strText);
+	m_lstSource.SetCurSel(sel - 1);
+}
+
+
+void CDlgConfiger::OnBnClickedBtnSourceDown()
+{
+	int sel = m_lstSource.GetCurSel();
+	if (sel < 0 || sel == m_lstSource.GetCount() - 1) return;
+	CString strText;
+	m_lstSource.GetText(sel, strText);
+	m_lstSource.DeleteString(sel);
+	m_lstSource.InsertString(sel + 1, strText);
+	m_lstSource.SetCurSel(sel + 1);
 }

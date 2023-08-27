@@ -26,8 +26,11 @@ class CFileStyleJudge
 public:
 	CFileStyleJudge();
 	~CFileStyleJudge();
-
+	void		AddDefaultTypes();
 	static CFileStyleJudge*	 GetInstance();
+
+	CString		GetSaveString();
+	BOOL		LoadSaveString(CString& str);
 
 	CString		ParseType(CString& extname);
 	BOOL		UpdateExtText(int index, CString& text);

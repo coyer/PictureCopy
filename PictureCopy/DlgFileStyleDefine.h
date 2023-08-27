@@ -21,7 +21,8 @@ public:
 #endif
 	BOOL	UpdateExtText(BOOL savemode);
 
-
+	void	RenameCursel();
+	void	UpdateUI();
 protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV Ö§³Ö
 
@@ -38,4 +39,6 @@ public:
 	afx_msg void OnKillfocusEditExtendDesc();
 	afx_msg void OnBnClickedOk();
 	afx_msg void OnDblclkListStylename();
+	afx_msg void OnBnClickedBtnRename();
+	afx_msg void OnBnClickedBtnAddDefault();
 };

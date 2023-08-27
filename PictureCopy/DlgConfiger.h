@@ -67,4 +67,8 @@ public:
 
 	afx_msg void OnBnClickedButtonDateRange();
 	virtual BOOL PreTranslateMessage(MSG* pMsg);
+	// 比较文件内容
+	BOOL m_bCheckFileContent;
+	afx_msg void OnBnClickedBtnSourceUp();
+	afx_msg void OnBnClickedBtnSourceDown();
 };

@@ -87,10 +87,9 @@ BOOL CFileDealer::ParseFileExtType()
 	if (strType.GetLength() > 0) {
 		return TRUE;
 	}
-	else {
-		m_styleType = _T("others");
-		return FALSE;
-	}
+
+	m_styleType = _T("others");
+	return FALSE;
 }
 
 int SplitNumberFromString(const char* strval, int* arrData, int maxcount) {
@@ -338,6 +337,54 @@ BOOL CFileDealer::IsPathExistEx(LPCTSTR csPath)
 {
 	WIN32_FILE_ATTRIBUTE_DATA attrs = { 0 };
 	return 0 != GetFileAttributesEx(csPath, GetFileExInfoStandard, &attrs);
+}
+
+#define CONTENT_READ_LEN (4096 * 4)
+BOOL CFileDealer::CheckFileIsSame(CString filenameA, CString filenameB, BOOL* pResult)
+{
+	if (filenameA.CompareNoCase(filenameB) == 0) return FALSE;
+	CFile fa, fb;
+	if (!fa.Open(filenameA, CFile::modeRead | CFile::typeBinary)) return FALSE;
+	if (!fb.Open(filenameB, CFile::modeRead | CFile::typeBinary)) {
+		fa.Close();
+		return FALSE;
+	}
+
+	__int64 fileLen = fa.GetLength();
+	if (fileLen != fb.GetLength()) {
+		fa.Close();
+		fb.Close();
+		return FALSE;
+	}
+
+	char* ca = new char[CONTENT_READ_LEN];
+	char* cb = new char[CONTENT_READ_LEN];
+	BOOL result = TRUE;
+	while (1)
+	{
+		int len = fa.Read(ca, CONTENT_READ_LEN);
+		if (len > 0) {
+			if (fb.Read(cb, CONTENT_READ_LEN) != len) {
+				result = FALSE;
+				break;
+			}
+			if (memcmp(ca, cb, len) != 0) {
+				result = FALSE;
+				break;
+			}
+		}
+		
+		if (len < CONTENT_READ_LEN) break;
+	}
+
+	fa.Close();
+	fb.Close();
+	delete[] ca;
+	delete[] cb;
+
+	*pResult = result;
+
+	return TRUE;
 }
 
 BOOL CFileDealer::ReplaceStringVariant(CString& strVar, BOOL isPathMode) {

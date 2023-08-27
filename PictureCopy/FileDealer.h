@@ -45,6 +45,8 @@ public:
 	static BOOL IsPathExist(LPCTSTR csPath);
 	static BOOL IsPathExistEx(LPCTSTR csPath);
 
+	static BOOL CheckFileIsSame(CString filenameA, CString filenameB, BOOL* pResult);
+
 	CString&	GetFileExt() { return m_extName; }
 	CString&	GetFileExtType() { return m_styleType; }
 	CString&	GetFileDevice() { return m_exifDevice; }

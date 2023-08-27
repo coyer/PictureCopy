@@ -59,7 +59,9 @@ public:
 
 	BOOL	BeforePrepareRun();
 	BOOL	isFileNeedMoreTime();
-	BOOL	isFileNeedExtType();
+	//BOOL	isFileNeedExtType();
+
+	CString getFileTypeString();
 
 	CString destPathRoot;
 	CStringArray sourcePaths;
@@ -75,6 +77,7 @@ public:
 	int		timeFromFilename;
 	int		yearRangeMin;
 	int		yearRangeMax;
+	BOOL	checkFileContent;
 
 protected:
 	void	SetConfig(CString& keyname, CString& value);
@@ -82,6 +85,6 @@ protected:
 	CStringA combineKeyValue(const char* keyname, int keyvalue);
 
 	BOOL	m_bNeedMoreTime;
-	BOOL	m_bNeedExtType;
+	//BOOL	m_bNeedExtType;
 };
 
