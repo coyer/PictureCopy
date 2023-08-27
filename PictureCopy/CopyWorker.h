@@ -33,6 +33,8 @@ public:
 	BOOL isRunning();
 	BOOL start();
 	void stop(BOOL sendMsg);
+	MYCPINFO* getStatInfo() { return &m_cpInfo; }
+	CString getStatInfoStr();
 
 	static BOOL checkFileExist(LPCTSTR filename);
 

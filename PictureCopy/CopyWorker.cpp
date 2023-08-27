@@ -166,6 +166,19 @@ void CCopyWorker::running() {
 	sendMsg(SYNCT_NEEDSTOP);
 }
 
+CString CCopyWorker::getStatInfoStr()
+{
+	CString log;
+	DWORD tc = GetTickCount() - m_cpInfo.dwStart;
+	short seconds = tc / 1000 % 60;
+	short minutes = tc / 1000 / 60 % 60;
+	short hours = tc / 1000 / 60 / 60 % 24;
+
+	log.Format(_T("文件夹数量: %d\n文件数量: %d\n拷贝数量: %d\n覆盖文件数: %d\n相同文件数: %d\n错误数量: %d\n消耗时间: %d:%02d:%02d"),
+		m_cpInfo.folderCount, m_cpInfo.fileCount, m_cpInfo.copyCount, m_cpInfo.overCount, m_cpInfo.existFile, m_cpInfo.errorCount, hours, minutes, seconds);
+
+	return log;
+}
 
 void CCopyWorker::listFiles(CString& baseSrc, CString folder)
 {

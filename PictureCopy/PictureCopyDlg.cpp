@@ -14,7 +14,7 @@
 #define new DEBUG_NEW
 #endif
 
-
+#define TIMER_ID	1000
 // 用于应用程序“关于”菜单项的 CAboutDlg 对话框
 
 class CAboutDlg : public CDialogEx
@@ -58,6 +58,7 @@ CPictureCopyDlg::CPictureCopyDlg(CWnd* pParent /*=NULL*/)
 {
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
 	m_pAutoProxy = NULL;
+	m_timer = NULL;
 }
 
 CPictureCopyDlg::~CPictureCopyDlg()
@@ -87,6 +88,7 @@ BEGIN_MESSAGE_MAP(CPictureCopyDlg, CDialogEx)
 	ON_WM_SIZE()
 //	ON_WM_SIZING()
 	ON_LBN_DBLCLK(IDC_LIST_INFO, &CPictureCopyDlg::OnDblclkListInfo)
+	ON_WM_TIMER()
 END_MESSAGE_MAP()
 
 
@@ -262,6 +264,7 @@ void CPictureCopyDlg::OnBnClickedStart()
 	
 	if (ret) {
 		Log(0, _T("启动任务成功，线程处理中..."));
+		m_timer = (HANDLE)SetTimer(TIMER_ID, 500, NULL);
 	}
 	else {
 		Log(0, _T("启动任务失败！"));
@@ -282,6 +285,8 @@ void CPictureCopyDlg::setButtonStatus()
 	BOOL running = m_worker.isRunning();
 	GetDlgItem(ID_START)->EnableWindow(!running);
 	GetDlgItem(IDC_BTN_STOP)->EnableWindow(running);
+
+	SetDlgItemText(ID_START, running ? _T("同步中") : _T("开始"));
 }
 
 void CPictureCopyDlg::ClearLog()
@@ -324,7 +329,7 @@ LRESULT CPictureCopyDlg::OnSyncMsg(UINT msgType, LPARAM lParam) {
 		Log(0, _T("因为错误原因而停止了同步任务"));
 		break;
 	case SYNCT_STOPED:
-		setButtonStatus();
+		OnTaskStoped();
 		break;
 	default:
 		break;
@@ -341,6 +346,23 @@ void CPictureCopyDlg::UpdateItemPos(int ID, int cx) {
 	pBtn->SetWindowPos(0, rc.left, rc.top, 0, 0, SWP_NOSIZE);
 }
 
+void CPictureCopyDlg::UpdateStatInfo()
+{
+	CString str = m_worker.getStatInfoStr();
+	SetDlgItemText(IDC_INFOR, str);
+	m_lstInfo.SetCaretIndex(m_lstInfo.GetCount() - 1);
+}
+
+void CPictureCopyDlg::OnTaskStoped()
+{
+	setButtonStatus();
+	if (m_timer) {
+		KillTimer(TIMER_ID);
+		m_timer = NULL;
+	}
+	UpdateStatInfo();
+}
+
 void CPictureCopyDlg::OnSize(UINT nType, int cx, int cy)
 {
 	CDialogEx::OnSize(nType, cx, cy);
@@ -353,6 +375,7 @@ void CPictureCopyDlg::OnSize(UINT nType, int cx, int cy)
 	UpdateItemPos(ID_START, cx);
 	UpdateItemPos(IDC_BTN_STOP, cx);
 	UpdateItemPos(IDC_BUTTON_CONFIG, cx);
+	UpdateItemPos(IDC_INFOR, cx);
 
 	m_lstInfo.SetWindowPos(NULL, 0, 0, cx - rc.Width() - 45, cy - 30, SWP_NOMOVE);
 }
@@ -390,4 +413,12 @@ void CPictureCopyDlg::OnDblclkListInfo()
 		//将存放有数据的内存块放入剪贴板的资源管理中
 		CloseClipboard();
 	}
+}
+
+
+void CPictureCopyDlg::OnTimer(UINT_PTR nIDEvent)
+{
+	this->UpdateStatInfo();
+
+	CDialogEx::OnTimer(nIDEvent);
 }

@@ -38,6 +38,7 @@ public:
 protected:
 	CPictureCopyDlgAutoProxy* m_pAutoProxy;
 	HICON m_hIcon;
+	HANDLE m_timer;
 
 	BOOL	CanExit();
 	void	setButtonStatus();
@@ -54,6 +55,8 @@ protected:
 	DECLARE_MESSAGE_MAP()
 
 	void	UpdateItemPos(int ID, int cx);
+	void	UpdateStatInfo();
+	void	OnTaskStoped();
 public:
 	afx_msg void OnBnClickedButtonConfig();
 	afx_msg void OnBnClickedStart();
@@ -66,4 +69,5 @@ public:
 	afx_msg void OnSize(UINT nType, int cx, int cy);
 //	afx_msg void OnSizing(UINT fwSide, LPRECT pRect);
 	afx_msg void OnDblclkListInfo();
+	afx_msg void OnTimer(UINT_PTR nIDEvent);
 };
