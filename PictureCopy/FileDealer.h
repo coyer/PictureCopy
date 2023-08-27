@@ -25,7 +25,6 @@ public:
 	~CFileDealer();
 
 	void		SetFilesize(__int64 size);
-	void		SetCreateTime(FILETIME createTime);
 	void		SetUpdateTime(FILETIME updateTime);
 
 	BOOL		SetMaybeTime(int year, int month, int day, int dayOfWeek);

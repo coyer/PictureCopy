@@ -44,20 +44,17 @@ CFileDealer::CFileDealer(CString& basePath, CString& path, CString filename) {
 	
 }
 
-void CFileDealer::SetCreateTime(FILETIME createTime)
+void CFileDealer::SetUpdateTime(FILETIME updateTime)
 {
+	m_updatetime = ((__int64)updateTime.dwHighDateTime << 32) + updateTime.dwLowDateTime;
+
 	SYSTEMTIME stUTC, timeLocal;
-	FileTimeToSystemTime(&createTime, &stUTC);
+	FileTimeToSystemTime(&updateTime, &stUTC);
 	SystemTimeToTzSpecificLocalTime(NULL, &stUTC, &timeLocal);
 	m_createTime.year = timeLocal.wYear;
 	m_createTime.month = timeLocal.wMonth;
 	m_createTime.day = timeLocal.wDay;
 	m_createTime.dayOfWeek = timeLocal.wDayOfWeek;
-}
-
-void CFileDealer::SetUpdateTime(FILETIME updateTime)
-{
-	m_updatetime = ((__int64)updateTime.dwHighDateTime << 32) + updateTime.dwLowDateTime;
 }
 
 void CFileDealer::SetFilesize(__int64 size)

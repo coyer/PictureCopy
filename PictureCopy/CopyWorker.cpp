@@ -225,9 +225,7 @@ void CCopyWorker::listFiles(CString& baseSrc, CString folder)
 			}
 			
 			filed.SetFilesize(size.QuadPart);
-			filed.SetCreateTime(findData.ftCreationTime);
 			filed.SetUpdateTime(findData.ftLastWriteTime);
-
 
 			if (m_pConfig->isFileNeedMoreTime()) {
 				filed.ParseMoreTimeInfo(m_pConfig->timeFromExif, m_pConfig->timeFromFilename, m_pConfig->timeFromFolder);
